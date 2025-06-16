@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgres://avnadmin:AVNS_BBSPrjDpuu-OyagzA8C@pg-25db95f3-challaharishreddy5-e743.l.aivencloud.com:25730/pgs?sslmode=require"
+}
+model Owner {
+  id            Int      @id @default(autoincrement())
+  fullName      String
+  email         String   @unique
+  mobileNumber  String
+  address       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  hostels       Hostel[] // One owner can have multiple hostels
+}
+
+model Hostel {
+  id               Int      @id @default(autoincrement())
+  ownerId          Int
+  owner            Owner    @relation(fields: [ownerId], references: [id])
+  name             String
+  description      String?
+  address          String
+  mapLocationLat   Float?   // Latitude for Google Maps
+  mapLocationLng   Float?   // Longitude for Google Maps
+  contactNumber    String
+  email            String   @unique
+  amenities        String[] // Array of amenities (e.g., ["WiFi", "AC", "Laundry"])
+  monthlyRevenue   Float    @default(0.0)
+  roomTypes        Json
+  images           String[] // Array of image URLs
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  rooms            Room[]
+}
+
+
+model Room {
+  id            Int      @id @default(autoincrement())
+  hostelId      Int
+  hostel        Hostel   @relation(fields: [hostelId], references: [id])
+  roomType      Int
+  ac            Boolean
+  price         Float
+  bathrooms     Int    
+  floorNumber   Int
+  roomNumber    String   @unique // Unique within hostel
+  status        RoomStatus @default(AVAILABLE)
+  occupiedBeds  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  residents     Resident[]
+}
+
+model Resident {
+  id                  Int      @id @default(autoincrement())
+  roomId              Int
+  room                Room     @relation(fields: [roomId], references: [id])
+  fullName            String
+  residentId          String   @unique
+  mobileNumberPrimary String
+  mobileNumberSecondary String?
+  email               String?  @unique
+  address             String
+  occupation          String?
+  identityDocImage    String?  // URL to identity document image
+  profileImage        String?  // URL to profile image
+  dateOfRegistration  DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  payments            Payment[]
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  residentId    Int
+  resident      Resident @relation(fields: [residentId], references: [id])
+  month         String   // e.g., "2025-05"
+  amount        Float
+  paymentType   PaymentType
+  paidDate      DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum PaymentType {
+  CASH
+  UPI
+  BANK_TRANSFER
+}
