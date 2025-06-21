@@ -1,7 +1,26 @@
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
-const userController = require('../../controllers/user-controllers/userController');
+const {
+  createUser,
+  getUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+getResidentDashboard,
+  createPayment,
+  getUserProfileByResidentId,
+  updateUserProfileByResidentId,
+  getPaymentSummaryAndHistory,
+  getUserNotificationsAndPaymentDue,
+  getCombinedHostelInfoByHostelId,
+  bookRoom,
+  // getHostelDetailsByHostelId,
+  getHostelsListForUser,
+  getPreviousStaysByUserId
+  
+
+} = require('../../controllers/user-controllers/userController');
 
 // Configure multer for handling file uploads
 const storage = multer.memoryStorage();
@@ -26,19 +45,32 @@ const uploadFields = upload.fields([
   { name: 'identityDocImage', maxCount: 1 }
 ]);
 
-// Create a new user
-router.post('/', uploadFields, userController.createUser);
+router.post('/', uploadFields, createUser);
+router.get('/', getUsers);
 
-// Get all users
-router.get('/', userController.getUsers);
+router.put('/:id', uploadFields, updateUser);
+router.delete('/:id', deleteUser);
+router.get('/:id/dashboard', getResidentDashboard);
 
-// Get user by ID
-router.get('/:id', userController.getUserById);
+router.post('/:id/payments', createPayment);
 
-// Update user
-router.put('/:id', uploadFields, userController.updateUser);
+// Get resident profile using residentId
+router.get('/profile/:residentId', getUserProfileByResidentId);
 
-// Delete user
-router.delete('/:id', userController.deleteUser);
+// Update resident profile
+router.put('/profile/:residentId', updateUserProfileByResidentId);
+// / Combined summary + history API
+router.get('/summary/:residentId', getPaymentSummaryAndHistory);
 
+router.get('/:residentId/notifications', getUserNotificationsAndPaymentDue);
+router.get('/hostels/:hostelId', getCombinedHostelInfoByHostelId);
+
+router.post('/:userId/bookings', bookRoom);
+
+
+// router.get('/details/:hostelId', getHostelDetailsByHostelId);
+
+router.get('/hostels', getHostelsListForUser);
+router.get('/:id', getUserById);
+router.get('/:userId/previous-stays', getPreviousStaysByUserId); 
 module.exports = router;
